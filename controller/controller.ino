@@ -103,9 +103,9 @@ void setup()
 		on_error_loop("GYROMETER INIT FAILURE");
 	}
 
-	logfile.write("MY ASS");
-
-	do_big_startup_light_show();
+	#if WRITE_THE_STUFF_TO_COMMA_DELIMITED_FILE
+	logfile.write("n,t,p\n"); // not network time protocol
+  #endif // WRITE_THE_STUFF_TO_COMMA_DELIMITED_FILE
 }
 
 void loop()
@@ -126,7 +126,10 @@ void loop()
 	CSV_WRITE_VALUE(time);
 	CSV_WRITE_VALUE(baro_event.pressure);
 	logfile.write("\n");
-	logfile.flush();
+	if (loop_counter % 10 == 0)
+	{
+		logfile.flush();
+	}
 	#endif // WRITE_THE_STUFF_TO_COMMA_DELIMITED_FILE
 
 	#if WRITE_THE_STUFF_TO_THE_SERIAL_PORT
@@ -134,12 +137,12 @@ void loop()
 	SERIAL_WRITE_VALUE("n:", loop_counter);
 	SERIAL_WRITE_VALUE("dt:", time / loop_counter);
 	SERIAL_WRITE_VALUE("p:", baro_event.pressure);
-	SERIAL_WRITE_VALUE("ax:", accel_event.acceleration.x);
-	SERIAL_WRITE_VALUE("ay:", accel_event.acceleration.y);
-	SERIAL_WRITE_VALUE("az:", accel_event.acceleration.z);
-	SERIAL_WRITE_VALUE("wx:", gyro_event.gyro.x);
-	SERIAL_WRITE_VALUE("wy:", gyro_event.gyro.y);
-	SERIAL_WRITE_VALUE("wz:", gyro_event.gyro.z);
+	// SERIAL_WRITE_VALUE("ax:", accel_event.acceleration.x);
+	// SERIAL_WRITE_VALUE("ay:", accel_event.acceleration.y);
+	// SERIAL_WRITE_VALUE("az:", accel_event.acceleration.z);
+	// SERIAL_WRITE_VALUE("wx:", gyro_event.gyro.x);
+	// SERIAL_WRITE_VALUE("wy:", gyro_event.gyro.y);
+	// SERIAL_WRITE_VALUE("wz:", gyro_event.gyro.z);
 	Serial.println();
 	#endif // WRITE_THE_STUFF_TO_THE_SERIAL_PORT
 
