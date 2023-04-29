@@ -3,6 +3,7 @@ import os
 import shutil
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn
 
 
 EXPECTED_CSV_HEADER = "n,t,p"
@@ -26,28 +27,34 @@ def main():
 
     os.mkdir(outdir)
 
-    index = 0
+    count = 0
     infile = open(filename)
     outfile = None
 
     for line in infile.read().splitlines():
         if line == EXPECTED_CSV_HEADER:
-            outpath = os.path.join(outdir, f"chunk-{index}.csv")
+            if outfile:
+                outfile.close()
+                outfile = None
+            outpath = os.path.join(outdir, f"chunk-{count}.csv")
             print(f"Writing to {outpath}")
             outfile = open(outpath, "w")
-            index += 1
+            count += 1
         outfile.write(f"{line}\n")
+    if outfile:
+        outfile.close()
 
     for f in os.listdir(outdir):
         fn = os.path.join(outdir, f)
         df = pd.read_csv(fn)
-        duration = (df.t.max() - df.t.min()) / 1000
+        if df.empty:
+            print(f"Empty: {fn}")
+            continue
         df["dt"] = df.t.diff()
-        print(df.head())
-        df.plot(x="t", y="dt", title=f"[{fn}] Delta Time ({duration:0.1f} s)")
-        plt.grid()
-        df.plot(x="t", y="p", title=f"[{fn}] Pressure ({duration:0.1f} s)")
-        plt.grid()
+        df.t /= 1000
+        seaborn.lineplot(data=df, x="t", y="p")
+        seaborn.lineplot(data=df, x="t", y="dt")
+    plt.grid()
     plt.show()
 
 
