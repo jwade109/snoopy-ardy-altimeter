@@ -28,11 +28,13 @@ void set_indicator_led(bool state, bool invert = false)
 
 void on_error_loop(const char *error)
 {
-  	int time = 0;
+	unsigned long time = 0;
 	while (1)
 	{
 		if (millis() - time > 1000)
 		{
+			Serial.print(millis());
+			Serial.print(" ");
 			Serial.println(error);
 			time = millis();
 		}
@@ -62,7 +64,9 @@ void write_log(const char *str)
 		{
 			on_error_loop("FILE ISN'T OPEN");
 		}
-		logfile.write(str, strlen(str));
+		size_t len = strlen(str);
+		size_t written = logfile.write(str, len);
+		Serial.println(written);
 		logfile.flush();
 	}
 	else
